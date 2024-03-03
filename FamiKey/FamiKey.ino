@@ -214,6 +214,7 @@ void loop() {
 
       // KEY IS CHANGED,
       // DO SOMETHING IF CONSISTENT FOR 5 "TICKS"
+      // THIS THRESHOLD HANDLES THE "DEBOUNCE" MECHANIC
       } else if (++*clean == 5) {
           *clean = 0;
 
