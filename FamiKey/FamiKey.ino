@@ -22,6 +22,8 @@
 
 #define COLUMNS     (18)
 
+#define DEBOUNCE    (10)
+
 
 
 
@@ -154,6 +156,17 @@ const byte KEYS[]={
 ////////////////////////////////////////////////////////////////////////////////
 // INIT ALL THE THINGS
 ////////////////////////////////////////////////////////////////////////////////
+void delayWrite(int pin, int value) {
+  digitalWrite(pin, value);
+  delayMicroseconds(50);
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// INIT ALL THE THINGS
+////////////////////////////////////////////////////////////////////////////////
 void setup() {
   // SETUP USB HID KEYBOARD
   Keyboard.begin();
@@ -169,21 +182,21 @@ void setup() {
   }
 
   // SETUP DATA INPUT REGISTERS
-  pinMode(KB_C2_D1,   INPUT);
-  pinMode(KB_C2_D2,   INPUT);
-  pinMode(KB_C2_D3,   INPUT);
-  pinMode(KB_C2_D4,   INPUT);
+  pinMode(KB_C2_D1,       INPUT);
+  pinMode(KB_C2_D2,       INPUT);
+  pinMode(KB_C2_D3,       INPUT);
+  pinMode(KB_C2_D4,       INPUT);
 
   // SETUP CONTROL REGISTERS
-  pinMode(KB_RESET,   OUTPUT);
-  pinMode(KB_ENABLE,  OUTPUT);
-  pinMode(KB_COL_SEL, OUTPUT);
+  pinMode(KB_RESET,       OUTPUT);
+  pinMode(KB_ENABLE,      OUTPUT);
+  pinMode(KB_COL_SEL,     OUTPUT);
 
   // INITIALIZE KEYBOARD
-  digitalWrite(KB_RESET,    HIGH);
-  digitalWrite(KB_RESET,    LOW);  
-  digitalWrite(KB_COL_SEL,  LOW);  
-  digitalWrite(KB_ENABLE,   HIGH);
+  delayWrite(KB_RESET,    HIGH);
+  delayWrite(KB_RESET,    LOW);  
+  delayWrite(KB_COL_SEL,  LOW);  
+  delayWrite(KB_ENABLE,   HIGH);
 }
 
 
@@ -193,19 +206,19 @@ void setup() {
 // READ ME SOME BUTT-ONZ
 ////////////////////////////////////////////////////////////////////////////////
 void loop() {
-  byte new_state[COLUMNS];
+  byte new_state;
   byte col = 0;
 
   for (auto i=0; i<COLUMNS; i++) {
-    new_state[i]  = digitalRead(KB_C2_D1) << 0
-                  | digitalRead(KB_C2_D2) << 1
-                  | digitalRead(KB_C2_D3) << 2
-                  | digitalRead(KB_C2_D4) << 3;
+    new_state = digitalRead(KB_C2_D1) << 0
+              | digitalRead(KB_C2_D2) << 1
+              | digitalRead(KB_C2_D3) << 2
+              | digitalRead(KB_C2_D4) << 3;
 
     // PROCESS KEY INPUT
     for (auto x=0; x<4; x++) {
       byte *clean = &key_clean[(i * 4) + x];
-      byte bit1   = (new_state[i] >> x) & 0x01;
+      byte bit1   = (new_state    >> x) & 0x01;
       byte bit2   = (key_state[i] >> x) & 0x01;
 
       // KEY IS UNCHANGED, DO NOTHING
@@ -213,39 +226,34 @@ void loop() {
         *clean = 0;
 
       // KEY IS CHANGED,
-      // DO SOMETHING IF CONSISTENT FOR 5 "TICKS"
+      // DO SOMETHING IF CONSISTENT FOR (DEBOUNCE) "TICKS"
       // THIS THRESHOLD HANDLES THE "DEBOUNCE" MECHANIC
-      } else if (++*clean == 5) {
-          *clean = 0;
+      } else if (++*clean == DEBOUNCE) {
+        *clean = 0;
 
-          byte key_code = KEYS[(i << 2) + x];
+        byte key_code = KEYS[(i << 2) + x];
 
-          // KEY IS NOW PRESSED
-          if (bit1) {
-            Keyboard.press(key_code);
-            key_state[i] |= (1 << x);
+        // KEY IS NOW PRESSED
+        if (bit1) {
+          Keyboard.press(key_code);
+          key_state[i] |= (1 << x);
             
-          // KEY IS RELEASED
-          } else {
-            Keyboard.release(key_code);
-            key_state[i] &= ~(1 << x);
-          }
+        // KEY IS RELEASED
+        } else {
+          Keyboard.release(key_code);
+          key_state[i] &= ~(1 << x);
         }
       }
-
+    }
 
     // TOGGLE COL SELECT PULSE LINE
-    digitalWrite(KB_COL_SEL, (++col & 0x01));
-
-    // DELAY BECAUSE THE RP2040 IS TOO DAMN FAST
-    // FOR THE FAMICOM'S CHIPS TO KEEP UP LAWLZ
-    delayMicroseconds(50);
+    delayWrite(KB_COL_SEL, (++col & 0x01));
   }
 
   // RESET COLUMN
-  digitalWrite(KB_COL_SEL,  LOW);
+  delayWrite(KB_COL_SEL,  LOW);
 
   // RESET ROW
-  digitalWrite(KB_RESET,    HIGH);
-  digitalWrite(KB_RESET,    LOW);
+  delayWrite(KB_RESET,    HIGH);
+  delayWrite(KB_RESET,    LOW);
 }
