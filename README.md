@@ -1,6 +1,8 @@
 # Famicom Keyboard USB Adapter
 The Family Computer (Famicom) Keyboard to USB HID Adapter using a Raspberry Pi RP2040.
 
+With just a RP2040 and a little bit of wiring, you can connect the Famicom's Keyboard up to any computer that accepts a standard USB HID interface. This has been tested on Windows, MacOS, and Android successfully. No drivers are required at all, as these and most other OSes ship with a native USB HID keyboard driver. After wiring up the keyboard adapter, this becomes entirely plug-n-play!
+
 
 
 
@@ -52,7 +54,7 @@ joypad 2 /D0 ?? | 08  /
 
 ## Notes
 
-The Famicom Keyboard was designed to work with the Famicom's 5V power and signalling. The console is comprised of just 3 ICs (Integrated Circuits / Chips): a 4017 *(Counter/Divider)*, a 4019 *(Quad AND/OR Select Gate)*, and a 4069 *(Hex Inverter)*. Each of these chips are designed to work at 5V, but have a minimum supply of 3V, the same as our RP2040.
+The Famicom Keyboard was designed to work with the Famicom's 5V power and signalling. The keyboard is comprised of just 3 ICs (Integrated Circuits / Computer Chips): a 4017 *(Counter/Divider)*, a 4019 *(Quad AND/OR Select Gate)*, and a 4069 *(Hex Inverter)*. Each of these chips are designed to work at 5V, but have a minimum supply of 3V, the same as our RP2040. Thanks to this, we can run the entire circuit at 3V without the need for any logic level converters.
 
 * [Keyboard Schematic](https://ia800502.us.archive.org/5/items/fc-factory-cpu-schematic-scan/FC%20Family%20Basic%20Keyboard%20and%20Sound%20Circuit%20Schematic.png)
 * [Keyboard Matrix](https://ia800502.us.archive.org/5/items/fc-factory-cpu-schematic-scan/FC%20Keyboard%20Key%20Schematic.png)
