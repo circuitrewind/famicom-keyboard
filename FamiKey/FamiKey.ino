@@ -167,7 +167,7 @@ const byte KEYS[]={
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// INIT ALL THE THINGS
+// SLOW DOWN CLOCK PULSES TO NOT OVERWHELM THE YE OLD FAMICOM KEYBOARD!
 // NOTE: lower delay values caused very frequent read errors from the keyboard
 ////////////////////////////////////////////////////////////////////////////////
 void delayWrite(int pin, int value) {
@@ -250,7 +250,7 @@ void loop() {
       // KEY IS CHANGED,
       // DO SOMETHING IF CONSISTENT FOR (DEBOUNCE) "TICKS"
       // THIS THRESHOLD HANDLES THE "DEBOUNCE" MECHANIC
-      } else if (++*clean == DEBOUNCE) {
+      } else if (++*clean >= DEBOUNCE) {
         *clean = 0;
 
         byte key_code = KEYS[(i << 2) + x];
