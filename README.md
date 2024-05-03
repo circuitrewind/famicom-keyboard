@@ -1,7 +1,7 @@
 # Famicom Keyboard USB Adapter
 The Family Computer (Famicom) Keyboard to USB HID Adapter using a Raspberry Pi RP2040.
 
-With just a RP2040 and a little bit of wiring, you can connect the Famicom's Keyboard up to any computer that accepts a standard USB HID interface. This has been tested on Windows, MacOS, and Android successfully. No drivers are required at all, as these and most other OSes ship with a native USB HID keyboard driver. After wiring up the keyboard adapter, this becomes entirely plug-n-play!
+With just a RP2040 and a little bit of wiring, you can connect the Famicom's Keyboard up to any computer that accepts a standard USB HID interface. This has been tested on Windows, FreeBSD, MacOS, iPad iOS, and Android successfully. No drivers are required at all, as these and most other OSes ship with a native USB HID keyboard driver. After wiring up the keyboard adapter, this becomes entirely plug-n-play!
 
 
 
