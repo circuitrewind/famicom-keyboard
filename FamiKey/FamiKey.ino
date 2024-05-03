@@ -1,9 +1,11 @@
+//#define USBCON
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // LIBRARY INCLUDES
 ////////////////////////////////////////////////////////////////////////////////
 #include <Keyboard.h>
+//#include <HID-Project.h>
 
 
 
@@ -11,18 +13,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 // CONFIG ALL THE THINGS
 ////////////////////////////////////////////////////////////////////////////////
-#define KB_RESET    (0x01)
-#define KB_ENABLE   (0x02)
-#define KB_COL_SEL  (0x03)
+#define KB_RESET    (11)
+#define KB_COL_SEL  (12)
+#define KB_ENABLE   (13)
 
-#define KB_C2_D1    (0x05)
-#define KB_C2_D2    (0x06)
-#define KB_C2_D3    (0x07)
-#define KB_C2_D4    (0x08)
+#define KB_C2_D1    (26)
+#define KB_C2_D2    ( 7)
+#define KB_C2_D3    ( 6)
+#define KB_C2_D4    ( 5)
 
 #define COLUMNS     (18)
+#define ROWS        ( 4)
 
-#define DEBOUNCE    (10)
+#define DEBOUNCE    ( 5)
 
 
 
@@ -31,7 +34,17 @@
 // KEY CODE STATUS
 ////////////////////////////////////////////////////////////////////////////////
 byte key_state[COLUMNS];
-byte key_clean[COLUMNS*4];
+byte key_clean[COLUMNS * ROWS];
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// CUSTOM KEY CODES NOT DEFINED BY ARDUINO
+////////////////////////////////////////////////////////////////////////////////
+#ifndef KEY_KANA
+#define KEY_KANA (0x88)
+#endif
 
 
 
@@ -48,19 +61,19 @@ const byte KEYS[]={
   ']',
 
   // COL 02
-  KEY_RIGHT_ALT,    // KANA
+  KEY_KANA,         // KANA
   KEY_RIGHT_SHIFT,
-  '\\',             // ¥
+  '\\',             // ¥ |
   KEY_BACKSPACE,    // STOP
 
   // COL 03
   KEY_F7,
-  '\'',             // @
+  '`',              // @
   '\'',             // :
   ';',              // ;
 
   // COL 04
-  '_',
+  KEY_RIGHT_ALT,    // _
   '/',              // /
   '-',              // - =
   '=',              // ^
@@ -155,6 +168,7 @@ const byte KEYS[]={
 
 ////////////////////////////////////////////////////////////////////////////////
 // INIT ALL THE THINGS
+// NOTE: lower delay values caused very frequent read errors from the keyboard
 ////////////////////////////////////////////////////////////////////////////////
 void delayWrite(int pin, int value) {
   digitalWrite(pin, value);
@@ -177,15 +191,22 @@ void setup() {
   }
 
   // ZERO OUT ALL DEBOUNCE DATA
-  for (auto i=0; i<COLUMNS*4; i++) {
+  for (auto i=0; i<COLUMNS*ROWS; i++) {
     key_clean[i] = 0;
   }
 
+
+  // FIXING HARDWARE BUGS
+  pinMode(15, INPUT_PULLDOWN);
+  pinMode(8,  OUTPUT);
+  digitalWrite(8, HIGH);
+  
+
   // SETUP DATA INPUT REGISTERS
-  pinMode(KB_C2_D1,       INPUT);
-  pinMode(KB_C2_D2,       INPUT);
-  pinMode(KB_C2_D3,       INPUT);
-  pinMode(KB_C2_D4,       INPUT);
+  pinMode(KB_C2_D1,       INPUT_PULLDOWN);
+  pinMode(KB_C2_D2,       INPUT_PULLDOWN);
+  pinMode(KB_C2_D3,       INPUT_PULLDOWN);
+  pinMode(KB_C2_D4,       INPUT_PULLDOWN);
 
   // SETUP CONTROL REGISTERS
   pinMode(KB_RESET,       OUTPUT);
@@ -208,6 +229,7 @@ void setup() {
 void loop() {
   byte new_state;
   byte col = 0;
+  char buff[32];
 
   for (auto i=0; i<COLUMNS; i++) {
     new_state = digitalRead(KB_C2_D1) << 0
@@ -216,8 +238,8 @@ void loop() {
               | digitalRead(KB_C2_D4) << 3;
 
     // PROCESS KEY INPUT
-    for (auto x=0; x<4; x++) {
-      byte *clean = &key_clean[(i * 4) + x];
+    for (auto x=0; x<ROWS; x++) {
+      byte *clean = &key_clean[(i * ROWS) + x];
       byte bit1   = (new_state    >> x) & 0x01;
       byte bit2   = (key_state[i] >> x) & 0x01;
 
@@ -233,15 +255,23 @@ void loop() {
 
         byte key_code = KEYS[(i << 2) + x];
 
+
         // KEY IS NOW PRESSED
         if (bit1) {
           Keyboard.press(key_code);
           key_state[i] |= (1 << x);
-            
+
+          sprintf(buff, "%02X DOWN\n", key_code);
+          Serial.write(buff);
+
+
         // KEY IS RELEASED
         } else {
           Keyboard.release(key_code);
           key_state[i] &= ~(1 << x);
+
+          sprintf(buff, "%02X UP\n", key_code);
+          Serial.write(buff);
         }
       }
     }

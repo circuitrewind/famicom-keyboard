@@ -8,13 +8,13 @@ The Family Computer (Famicom) Keyboard to USB HID Adapter using a Raspberry Pi R
 
 | RP2040 | DA15 | Name | Function        |
 | ------ | ---- | ---- | --------------- |
-|      1 |   12 | OUT0 | Row Reset       |
-|      2 |   10 | OUT2 | Keyboard Enable |  
-|      3 |   11 | OUT1 | Column Select   |
-|      5 |   07 | J2D1 | Data Pin 1      |
-|      6 |   06 | J2D2 | Data Pin 2      |
-|      7 |   05 | J2D3 | Data Pin 3      |
-|      8 |   04 | J2D4 | Data Pin 4      |
+|     11 |   12 | OUT0 | Row Reset       |
+|     12 |   11 | OUT1 | Column Select   |
+|     13 |   10 | OUT2 | Keyboard Enable |  
+|     26 |   07 | J2D1 | Data Pin 1      |
+|      7 |   06 | J2D2 | Data Pin 2      |
+|      6 |   05 | J2D3 | Data Pin 3      |
+|      5 |   04 | J2D4 | Data Pin 4      |
 |    GND |   01 |  GND | Ground          |
 |    +3V |   15 |  +5V | Power           |
 
